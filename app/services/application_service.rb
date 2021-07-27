@@ -44,4 +44,3 @@ class ServiceResponse
   end
 end
 
-<name>-object-service-exercse
