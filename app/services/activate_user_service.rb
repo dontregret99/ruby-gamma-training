@@ -5,15 +5,9 @@ class ActivateUserService < ApplicationService
 
   def call
     ActiveRecord::Base.transaction do
-      exsiting_deleted_user = User.only_deleted.find_by_email(@user_params[:email])
-      exsiting_deleted_user.really_destroy! if exsiting_deleted_user.present?
-
-      user = User.new(@user_params)
-
-      user.set_default_password
-      user.set_random_username
-      user.created_by = current_user
-      user.add_role(:user)
+      really_destroy
+      
+      user = create_user
 
       if user.save!
         Mailer.send_confirmation_email(user)
@@ -25,5 +19,20 @@ class ActivateUserService < ApplicationService
   end
 
   private
+
+  def really_destroy
+    exsiting_deleted_user = User.only_deleted.find_by_email(@user_params[:email])
+    exsiting_deleted_user.really_destroy! if exsiting_deleted_user.present?
+  end
+
+  def create_user
+    user = User.new(@user_params)
+
+    user.set_default_password
+    user.set_random_username
+    user.created_by = current_user
+    user.add_role(:user)
+    user
+  end
 
 end
